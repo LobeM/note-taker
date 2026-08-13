@@ -1,1 +1,45 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+Keep your replies extremely concise and focus on conveying the key information. No unnecessary fluff, no long code snipets.
+
 @AGENTS.md
+
+## Commands
+
+Bun is the package manager _and_ the intended runtime (`packageManager: bun@1.3.14`, `bun.lock`). Use `bun`, not npm/pnpm/yarn.
+
+```bash
+bun install          # install deps
+bun dev              # dev server on :3000 (also regenerates the AGENTS.md block)
+bun run build        # production build
+bun start            # serve the production build
+bun run lint         # eslint (flat config, auto-discovers eslint.config.mjs)
+bunx tsc --noEmit    # typecheck only
+```
+
+No test runner is configured yet. If tests are added, use `bun test` (`@types/bun` is already a devDependency); a single file is `bun test path/to/file.test.ts`, a single case `bun test -t "name"`.
+
+## State of the repo
+
+This is still close to a `create-next-app` scaffold: `app/` contains only `layout.tsx`, `page.tsx` (a "Hello world"), and `globals.css`. The dependencies for the real app — `@tiptap/*`, `better-auth`, `zod` — are installed but **not yet wired up**.
+
+`SPEC.md` is the design document being implemented: an authenticated rich-text note-taking app (TipTap JSON stored in SQLite, notes publicly shareable at `/p/[slug]`). Read it before building features — it defines the DB schema, the `lib/db.ts` / `lib/notes.ts` repository API, the `/api/notes` route handlers, and the page structure. Two places where it has drifted from the current toolchain:
+
+- It says to configure `tailwind.config.ts`. This project is on **Tailwind v4**, which is CSS-first — theme tokens live in the `@theme inline` block in `app/globals.css` and there is no config file.
+- Its example TipTap config imports `@tiptap/extension-code` / `-code-block` separately; only `@tiptap/starter-kit` is installed, and StarterKit v3 already bundles those nodes.
+
+Persistence is meant to use `bun:sqlite` with raw SQL, which only runs under the Bun runtime — DB access must stay in server components, route handlers, and Node/Bun-runtime code (never Edge runtime, never client components).
+
+## Architecture notes
+
+- **Next.js 16 App Router.** Read the relevant guide under `node_modules/next/dist/docs/` (see AGENTS.md) before writing route/layout/API code — this version differs from older Next.js conventions.
+- **Typed route helpers are global and generated.** `app/layout.tsx` uses `LayoutProps<"/">` without importing it; the equivalents (`PageProps<...>`, etc.) come from `.next/types` and only exist after a build or dev run. A cold `tsc --noEmit` on a clean checkout can fail until `bun dev`/`bun run build` has generated them.
+- **Path alias:** `@/*` maps to the repo root (so `@/lib/db`, `@/components/NoteEditor`).
+- **Styling:** Tailwind v4 via `@tailwindcss/postcss`; `app/globals.css` defines `--background`/`--foreground` with a `prefers-color-scheme: dark` override and exposes them as `--color-background`/`--color-foreground` plus the Geist font variables.
+- **Security invariant from SPEC.md:** every authenticated note query filters on `user_id` in the SQL itself; public reads go through `public_slug` and must never leak owner data.
+
+## AGENTS.md
+
+`AGENTS.md` is rewritten by `next dev` (see `node_modules/next/dist/server/lib/generate-agent-files.js`). Reverting it out of a diff just recreates the uncommitted change — commit it along with your work to keep the tree clean.
