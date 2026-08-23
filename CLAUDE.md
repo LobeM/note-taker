@@ -26,7 +26,15 @@ No test runner is configured yet. If tests are added, use `bun test` (`@types/bu
 
 ## State of the repo
 
-This is still close to a `create-next-app` scaffold: `app/` contains only `layout.tsx`, `page.tsx` (a "Hello world"), and `globals.css`. The dependencies for the real app — `@tiptap/*`, `better-auth`, `zod` — are installed but **not yet wired up**.
+**Auth is done; notes are not.** better-auth is wired end to end — `lib/auth.ts` (email/password, `nextCookies()`, `getSession()` / `getCurrentUser()`), `app/api/auth/[...all]/route.ts`, all four better-auth tables in `lib/db.ts`, and the UI: `app/auth/page.tsx` + `components/AuthForm.tsx` + the server actions in `app/auth/actions.ts`, with a session-aware nav in `app/layout.tsx` and a server-side guard on `/dashboard`. `@tiptap/*` is installed but **not yet wired up**, and `lib/notes.ts` / `/api/notes` do not exist — `app/page.tsx`, `app/notes/[id]/page.tsx`, and `app/p/[slug]/page.tsx` are still placeholders.
+
+Auth conventions worth keeping:
+
+- **One `/auth` route**, not SPEC.md §8.2's `login` + `register` split. Sign in vs. sign up is a search param (`?mode=signup`), so the mode is linkable and back-button-able; `app/auth/page.tsx` keys `<AuthForm>` on the mode to reset its `useActionState`.
+- **Credentials go through server actions**, never `lib/auth-client.ts` — the `nextCookies()` plugin sets the session cookie, no token touches the browser, and the form works without JS. `redirect()` must stay outside the `try` that catches `APIError` (it signals by throwing).
+- **`?next=` is untrusted.** Everything routes it through `safeRedirectPath()` in `lib/auth-schemas.ts`, which rejects absolute and protocol-relative URLs.
+- **No `middleware.ts`.** SPEC.md §2 asks for one, but `lib/auth` → `lib/db` → `bun:sqlite` cannot run at the Edge. Route protection is a `getCurrentUser()` check in the server component.
+- Reading the session in the root layout makes every route dynamic. Accepted for now; move it into a `<Suspense>`-wrapped `<UserNav />` if `/p/[slug]` needs static rendering.
 
 `SPEC.md` is the design document being implemented: an authenticated rich-text note-taking app (TipTap JSON stored in SQLite, notes publicly shareable at `/p/[slug]`). Read it before building features — it defines the DB schema, the `lib/db.ts` / `lib/notes.ts` repository API, the `/api/notes` route handlers, and the page structure. Two places where it has drifted from the current toolchain:
 
