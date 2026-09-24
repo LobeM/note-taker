@@ -550,7 +550,7 @@ Content is always stored in DB as `JSON.stringify(json)`; when loading, `JSON.pa
 
 Buttons:
 
-- Bold, Italic
+- Bold, Italic, Underline
 - H1, H2, H3, paragraph
 - Bullet list
 - Inline code

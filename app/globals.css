@@ -24,3 +24,34 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Rich-text content from TipTap (editor and, later, read-only views). */
+@layer components {
+  .tiptap > * + * {
+    @apply mt-3;
+  }
+  .tiptap h1 {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+  .tiptap h2 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  .tiptap h3 {
+    @apply text-xl font-semibold;
+  }
+  .tiptap ul {
+    @apply list-disc pl-6;
+  }
+  .tiptap code {
+    @apply rounded bg-black/5 px-1 py-0.5 font-mono text-[0.9em] dark:bg-white/10;
+  }
+  .tiptap pre {
+    @apply overflow-x-auto rounded-md bg-black/5 p-4 font-mono text-sm dark:bg-white/10;
+  }
+  .tiptap pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+  .tiptap hr {
+    @apply my-6 border-black/15 dark:border-white/20;
+  }
+}

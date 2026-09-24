@@ -11,7 +11,7 @@ import {
   signInSchema,
   signUpSchema,
 } from "@/lib/auth-schemas";
-import type { ZodError } from "zod";
+import { toFieldErrors } from "@/lib/form-errors";
 
 export type AuthFormState = {
   fieldErrors?: Partial<Record<AuthField, string>>;
@@ -21,17 +21,6 @@ export type AuthFormState = {
 };
 
 type FormValues = AuthFormState["values"];
-
-/** First message per field; that's all the form has room to show. */
-function toFieldErrors(error: ZodError): Partial<Record<AuthField, string>> {
-  const fieldErrors: Partial<Record<AuthField, string>> = {};
-  for (const issue of error.issues) {
-    const field = issue.path[0];
-    if (typeof field !== "string") continue;
-    fieldErrors[field as AuthField] ??= issue.message;
-  }
-  return fieldErrors;
-}
 
 /**
  * Runs a better-auth call and turns its APIError into form state. better-auth's
@@ -75,7 +64,7 @@ export async function authenticate(
     const values = { name, email };
     const parsed = signUpSchema.safeParse({ name, email, password });
     if (!parsed.success) {
-      return { fieldErrors: toFieldErrors(parsed.error), values };
+      return { fieldErrors: toFieldErrors<AuthField>(parsed.error), values };
     }
     failure = await toFormError(
       () => auth.api.signUpEmail({ body: parsed.data }),
@@ -85,7 +74,7 @@ export async function authenticate(
     const values = { email };
     const parsed = signInSchema.safeParse({ email, password });
     if (!parsed.success) {
-      return { fieldErrors: toFieldErrors(parsed.error), values };
+      return { fieldErrors: toFieldErrors<AuthField>(parsed.error), values };
     }
     failure = await toFormError(
       () => auth.api.signInEmail({ body: parsed.data }),
