@@ -12,16 +12,24 @@ export function parseMode(value: unknown): AuthMode {
 
 export const DEFAULT_REDIRECT = "/dashboard";
 
+const SENTINEL_ORIGIN = "http://sentinel.invalid";
+
 /**
  * `?next=` is attacker-controllable, so only same-origin *paths* survive.
- * "//evil.com" and "/\evil.com" are protocol-relative URLs that browsers
- * happily follow off-site, hence the second character check.
+ * Prefix checks aren't enough: browsers strip tabs/newlines and treat "\" as
+ * "/", so "/\t/evil.com" becomes "//evil.com". Resolving against a sentinel
+ * origin with the same URL parser the browser uses catches every such variant.
  */
 export function safeRedirectPath(value: unknown): string {
-  if (typeof value !== "string") return DEFAULT_REDIRECT;
-  if (!value.startsWith("/")) return DEFAULT_REDIRECT;
-  if (value.startsWith("//") || value.startsWith("/\\")) return DEFAULT_REDIRECT;
-  return value;
+  if (typeof value !== "string" || !value.startsWith("/")) return DEFAULT_REDIRECT;
+  try {
+    const url = new URL(value, SENTINEL_ORIGIN);
+    if (url.origin !== SENTINEL_ORIGIN) return DEFAULT_REDIRECT;
+    // Normalized, so control characters never reach the Location header.
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return DEFAULT_REDIRECT;
+  }
 }
 
 export const signInSchema = z.object({

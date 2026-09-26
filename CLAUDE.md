@@ -32,7 +32,8 @@ Auth conventions worth keeping:
 
 - **One `/auth` route**, not SPEC.md §8.2's `login` + `register` split. Sign in vs. sign up is a search param (`?mode=signup`), so the mode is linkable and back-button-able; `app/auth/page.tsx` keys `<AuthForm>` on the mode to reset its `useActionState`.
 - **Credentials go through server actions**, never `lib/auth-client.ts` — the `nextCookies()` plugin sets the session cookie, no token touches the browser, and the form works without JS. `redirect()` must stay outside the `try` that catches `APIError` (it signals by throwing).
-- **`?next=` is untrusted.** Everything routes it through `safeRedirectPath()` in `lib/auth-schemas.ts`, which rejects absolute and protocol-relative URLs.
+- **`?next=` is untrusted.** Everything routes it through `safeRedirectPath()` in `lib/auth-schemas.ts`, which resolves it with `new URL()` against a sentinel origin (prefix checks miss `/\t/evil.com`).
+- **Rate limiting is ours, not better-auth's.** Its limiter only runs on the `/api/auth` HTTP router; `auth.api.*` calls from server actions bypass it. Use `consumeRateLimit()` in `lib/rate-limit.ts` (SQLite `rate_limit` table) before any credential call.
 - **No `middleware.ts`.** SPEC.md §2 asks for one, but `lib/auth` → `lib/db` → `bun:sqlite` cannot run at the Edge. Route protection is a `getCurrentUser()` check in the server component.
 - Reading the session in the root layout makes every route dynamic. Accepted for now; move it into a `<Suspense>`-wrapped `<UserNav />` if `/p/[slug]` needs static rendering.
 

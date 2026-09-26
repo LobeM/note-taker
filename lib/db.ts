@@ -72,13 +72,64 @@ CREATE TABLE IF NOT EXISTS notes (
   public_slug TEXT UNIQUE,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES "user" (id)
+  FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);
 CREATE INDEX IF NOT EXISTS idx_notes_public_slug ON notes(public_slug);
 CREATE INDEX IF NOT EXISTS idx_notes_is_public ON notes(is_public);
+
+CREATE TABLE IF NOT EXISTS rate_limit (
+  key TEXT PRIMARY KEY,
+  count INTEGER NOT NULL,
+  window_start INTEGER NOT NULL
+);
 `;
+
+/**
+ * Databases created before notes cascaded on user delete keep the old FK, since
+ * `CREATE TABLE IF NOT EXISTS` never alters. SQLite can't change a constraint in
+ * place, so rebuild the table (sqlite.org/lang_altertable.html, "other changes").
+ */
+function migrateNotesCascade(database: Database): void {
+  const fks = database
+    .query<{ table: string; on_delete: string }, []>("PRAGMA foreign_key_list(notes)")
+    .all();
+  if (fks.every((fk) => fk.table !== "user" || fk.on_delete === "CASCADE")) return;
+
+  // Must be toggled outside a transaction, or it is silently ignored.
+  database.run("PRAGMA foreign_keys = OFF;");
+  try {
+    database.transaction(() => {
+      database.run(`
+        CREATE TABLE notes_new (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          content_json TEXT NOT NULL,
+          is_public INTEGER NOT NULL DEFAULT 0,
+          public_slug TEXT UNIQUE,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE
+        );
+        INSERT INTO notes_new SELECT id, user_id, title, content_json, is_public,
+          public_slug, created_at, updated_at FROM notes;
+        DROP TABLE notes;
+        ALTER TABLE notes_new RENAME TO notes;
+        CREATE INDEX idx_notes_user_id ON notes(user_id);
+        CREATE INDEX idx_notes_public_slug ON notes(public_slug);
+        CREATE INDEX idx_notes_is_public ON notes(is_public);
+      `);
+      const violations = database.query("PRAGMA foreign_key_check(notes)").all();
+      if (violations.length > 0) {
+        throw new Error(`notes has ${violations.length} orphaned row(s); migration aborted`);
+      }
+    })();
+  } finally {
+    database.run("PRAGMA foreign_keys = ON;");
+  }
+}
 
 function createDb(): Database {
   mkdirSync(dirname(DB_PATH), { recursive: true });
@@ -93,6 +144,7 @@ function createDb(): Database {
   database.run("PRAGMA synchronous = NORMAL;");
 
   database.run(SCHEMA);
+  migrateNotesCascade(database);
 
   return database;
 }

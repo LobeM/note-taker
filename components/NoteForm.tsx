@@ -60,6 +60,7 @@ export function NoteForm() {
           <NoteEditor
             labelledBy="content-label"
             errorId={contentError ? "content-error" : undefined}
+            editable={!pending}
             onChange={setContent}
           />
           <input type="hidden" name="content" value={content} />

@@ -9,6 +9,8 @@ type NoteEditorProps = {
   labelledBy: string;
   /** Id of an error message, set while the content is invalid. */
   errorId?: string;
+  /** False while the form submits, so nothing typed then is silently dropped. */
+  editable: boolean;
   onChange: (contentJson: string) => void;
 };
 
@@ -22,7 +24,7 @@ function editorAttributes(labelledBy: string, errorId?: string) {
   };
 }
 
-export function NoteEditor({ labelledBy, errorId, onChange }: NoteEditorProps) {
+export function NoteEditor({ labelledBy, errorId, editable, onChange }: NoteEditorProps) {
   const editor = useEditor({
     extensions: [StarterKit.configure({ heading: { levels: [1, 2, 3] } })],
     // Render on the client only, avoiding hydration mismatches under SSR.
@@ -38,11 +40,16 @@ export function NoteEditor({ labelledBy, errorId, onChange }: NoteEditorProps) {
     });
   }, [editor, labelledBy, errorId]);
 
+  // emitUpdate=false: toggling editability isn't a content change.
+  useEffect(() => {
+    editor?.setEditable(editable, false);
+  }, [editor, editable]);
+
   return (
     <div
       className="mt-1.5 overflow-hidden rounded-md border border-black/15 focus-within:border-black/40 has-aria-invalid:border-red-500 dark:border-white/20 dark:focus-within:border-white/50"
     >
-      {editor ? <Toolbar editor={editor} /> : null}
+      {editor ? <Toolbar editor={editor} disabled={!editable} /> : null}
       <EditorContent editor={editor} />
     </div>
   );
@@ -130,7 +137,7 @@ const TOGGLES = BUTTON_GROUPS.flat().filter((button) => button.isActive);
 
 type ActiveState = Record<string, boolean>;
 
-function Toolbar({ editor }: { editor: Editor }) {
+function Toolbar({ editor, disabled }: { editor: Editor; disabled: boolean }) {
   // Re-renders only when an active state actually flips, not on every keystroke.
   const active = useEditorState<ActiveState>({
     editor,
@@ -157,11 +164,12 @@ function Toolbar({ editor }: { editor: Editor }) {
             <button
               key={button.label}
               type="button"
+              disabled={disabled}
               aria-label={button.label}
               aria-pressed={button.isActive ? active[button.label] : undefined}
               title={button.label}
               onClick={() => button.run(editor)}
-              className="min-w-8 rounded px-2 py-1 font-mono text-xs font-medium opacity-70 hover:bg-black/5 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:opacity-100 dark:hover:bg-white/10"
+              className="min-w-8 rounded px-2 py-1 font-mono text-xs font-medium opacity-70 hover:bg-black/5 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:opacity-100 disabled:pointer-events-none dark:hover:bg-white/10"
             >
               {button.text}
             </button>
