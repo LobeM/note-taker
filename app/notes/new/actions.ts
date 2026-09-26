@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { toFieldErrors } from "@/lib/form-errors";
-import { createNoteSchema, type NoteField } from "@/lib/note-schemas";
+import { noteSchema, type NoteField } from "@/lib/note-schemas";
 import { createNote } from "@/lib/notes";
 
 export type NoteFormState = {
@@ -22,7 +22,7 @@ export async function createNoteAction(
   if (!user) redirect("/auth?next=/notes/new");
 
   const title = String(formData.get("title") ?? "");
-  const parsed = createNoteSchema.safeParse({
+  const parsed = noteSchema.safeParse({
     title,
     content: String(formData.get("content") ?? ""),
   });

@@ -12,6 +12,8 @@ type NoteEditorProps = {
   /** False while the form submits, so nothing typed then is silently dropped. */
   editable: boolean;
   onChange: (contentJson: string) => void;
+  /** Stringified TipTap doc to start from; read once, on mount. */
+  initialContent?: string;
 };
 
 function editorAttributes(labelledBy: string, errorId?: string) {
@@ -24,9 +26,16 @@ function editorAttributes(labelledBy: string, errorId?: string) {
   };
 }
 
-export function NoteEditor({ labelledBy, errorId, editable, onChange }: NoteEditorProps) {
+export function NoteEditor({
+  labelledBy,
+  errorId,
+  editable,
+  onChange,
+  initialContent,
+}: NoteEditorProps) {
   const editor = useEditor({
     extensions: [StarterKit.configure({ heading: { levels: [1, 2, 3] } })],
+    content: initialContent ? JSON.parse(initialContent) : undefined,
     // Render on the client only, avoiding hydration mismatches under SSR.
     immediatelyRender: false,
     editorProps: { attributes: editorAttributes(labelledBy, errorId) },
@@ -123,7 +132,7 @@ const BUTTON_GROUPS: ToolbarButton[][] = [
       label: "Code block",
       text: "{ }",
       isActive: (e) => e.isActive("codeBlock"),
-      run: (e) => e.chain().focus().toggleCodeBlock().run(),
+      run: toggleCodeBlock,
     },
     {
       label: "Horizontal rule",
@@ -133,7 +142,50 @@ const BUTTON_GROUPS: ToolbarButton[][] = [
   ],
 ];
 
-const TOGGLES = BUTTON_GROUPS.flat().filter((button) => button.isActive);
+/**
+ * TipTap's toggleCodeBlock converts each selected textblock separately, so a
+ * multi-line selection becomes a stack of one-line code blocks. Merge the
+ * selected blocks into a single code block instead, one line per block.
+ */
+function toggleCodeBlock(editor: Editor) {
+  const { state } = editor;
+  const { $from, $to } = state.selection;
+  const range = $from.blockRange($to);
+  const codeBlock = state.schema.nodes.codeBlock;
+
+  const canMerge =
+    !editor.isActive("codeBlock") &&
+    range !== null &&
+    range.endIndex - range.startIndex > 1 &&
+    range.parent.canReplaceWith(range.startIndex, range.endIndex, codeBlock);
+  if (!canMerge) {
+    editor.chain().focus().toggleCodeBlock().run();
+    return;
+  }
+
+  const lines: string[] = [];
+  state.doc.nodesBetween(range.start, range.end, (node) => {
+    if (!node.isTextblock) return true;
+    lines.push(node.textContent);
+    return false;
+  });
+  const text = lines.join("\n");
+
+  editor
+    .chain()
+    .focus()
+    .command(({ tr }) => {
+      tr.replaceWith(
+        range.start,
+        range.end,
+        codeBlock.create(null, text ? state.schema.text(text) : null),
+      );
+      return true;
+    })
+    .run();
+}
+
+const TOGGLES =BUTTON_GROUPS.flat().filter((button) => button.isActive);
 
 type ActiveState = Record<string, boolean>;
 

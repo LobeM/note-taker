@@ -2,17 +2,26 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import { updateNoteAction } from "@/app/notes/[id]/actions";
 import { createNoteAction, type NoteFormState } from "@/app/notes/new/actions";
 import { NoteEditor } from "@/components/NoteEditor";
 import { DEFAULT_TITLE, EMPTY_DOC_JSON, TITLE_MAX_LENGTH } from "@/lib/note-schemas";
 
 const INITIAL_STATE: NoteFormState = {};
 
-export function NoteForm() {
-  const [state, formAction, pending] = useActionState(createNoteAction, INITIAL_STATE);
+type NoteFormProps = {
+  /** The note being edited; omitted when creating one. */
+  note?: { id: string; title: string; contentJson: string };
+};
+
+export function NoteForm({ note }: NoteFormProps) {
+  const [state, formAction, pending] = useActionState(
+    note ? updateNoteAction.bind(null, note.id) : createNoteAction,
+    INITIAL_STATE,
+  );
   // Controlled, so React's post-action form reset can't clear it while the
   // editor still shows the content.
-  const [content, setContent] = useState(EMPTY_DOC_JSON);
+  const [content, setContent] = useState(note?.contentJson ?? EMPTY_DOC_JSON);
 
   const titleError = state.fieldErrors?.title;
   const contentError = state.fieldErrors?.content;
@@ -41,7 +50,7 @@ export function NoteForm() {
             placeholder={DEFAULT_TITLE}
             autoComplete="off"
             autoFocus
-            defaultValue={state.values?.title}
+            defaultValue={state.values?.title ?? note?.title}
             aria-invalid={titleError ? true : undefined}
             aria-describedby={titleError ? "title-error" : undefined}
             className="mt-1.5 w-full rounded-md border border-black/15 px-3 py-2 text-lg font-medium outline-none placeholder:opacity-40 focus-visible:border-black/40 aria-invalid:border-red-500 dark:border-white/20 dark:focus-visible:border-white/50"
@@ -62,6 +71,7 @@ export function NoteForm() {
             errorId={contentError ? "content-error" : undefined}
             editable={!pending}
             onChange={setContent}
+            initialContent={note?.contentJson}
           />
           <input type="hidden" name="content" value={content} />
           {contentError ? (
@@ -73,7 +83,7 @@ export function NoteForm() {
 
         <div className="flex items-center justify-end gap-3">
           <Link
-            href="/dashboard"
+            href={note ? `/notes/${note.id}` : "/dashboard"}
             className="rounded-md px-4 py-2 text-sm font-medium opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             Cancel
@@ -83,7 +93,7 @@ export function NoteForm() {
             aria-busy={pending}
             className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            {pending ? "Creating…" : "Create note"}
+            {note ? (pending ? "Saving…" : "Save changes") : pending ? "Creating…" : "Create note"}
           </button>
         </div>
       </fieldset>

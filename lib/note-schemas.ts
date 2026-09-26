@@ -23,7 +23,7 @@ const tiptapDocSchema = z.looseObject(
   INVALID_CONTENT,
 );
 
-export const createNoteSchema = z.object({
+export const noteSchema = z.object({
   title: z
     .string()
     .trim()

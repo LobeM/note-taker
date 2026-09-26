@@ -1,4 +1,4 @@
-import { get } from "@/lib/db";
+import { get, query, run } from "@/lib/db";
 import { DEFAULT_TITLE, EMPTY_DOC_JSON } from "@/lib/note-schemas";
 
 export type Note = {
@@ -61,4 +61,32 @@ export function getNoteById(userId: string, noteId: string): Note | null {
     [noteId, userId],
   );
   return row ? toNote(row) : null;
+}
+
+export function getNotesByUser(userId: string): Note[] {
+  return query<NoteRow>(
+    "SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC",
+    [userId],
+  ).map(toNote);
+}
+
+/** Returns null when the note doesn't exist or belongs to someone else. */
+export function updateNote(
+  userId: string,
+  noteId: string,
+  data: { title: string; contentJson: string },
+): Note | null {
+  const row = get<NoteRow>(
+    `UPDATE notes
+     SET title = ?, content_json = ?, updated_at = datetime('now')
+     WHERE id = ? AND user_id = ?
+     RETURNING *`,
+    [data.title, data.contentJson, noteId, userId],
+  );
+  return row ? toNote(row) : null;
+}
+
+/** Returns false when there was nothing of this user's to delete. */
+export function deleteNote(userId: string, noteId: string): boolean {
+  return run("DELETE FROM notes WHERE id = ? AND user_id = ?", [noteId, userId]).changes > 0;
 }
