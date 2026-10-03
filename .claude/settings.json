@@ -1,5 +1,18 @@
 {
   "permissions": {
     "allow": ["Bash(**/.env)", "Read(**/.env)", "Edit(**/.env)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && bun run format 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
   }
 }

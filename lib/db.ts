@@ -1,9 +1,9 @@
-import { Database } from "bun:sqlite";
-import type { Changes, SQLQueryBindings } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { Database } from 'bun:sqlite';
+import type { Changes, SQLQueryBindings } from 'bun:sqlite';
+import { mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
-const DB_PATH = process.env.DATABASE_PATH ?? "data/app.db";
+const DB_PATH = process.env.DATABASE_PATH ?? 'data/app.db';
 
 /**
  * The `user`/`session`/`account`/`verification` DDL is the output of better-auth
@@ -93,12 +93,12 @@ CREATE TABLE IF NOT EXISTS rate_limit (
  */
 function migrateNotesCascade(database: Database): void {
   const fks = database
-    .query<{ table: string; on_delete: string }, []>("PRAGMA foreign_key_list(notes)")
+    .query<{ table: string; on_delete: string }, []>('PRAGMA foreign_key_list(notes)')
     .all();
-  if (fks.every((fk) => fk.table !== "user" || fk.on_delete === "CASCADE")) return;
+  if (fks.every((fk) => fk.table !== 'user' || fk.on_delete === 'CASCADE')) return;
 
   // Must be toggled outside a transaction, or it is silently ignored.
-  database.run("PRAGMA foreign_keys = OFF;");
+  database.run('PRAGMA foreign_keys = OFF;');
   try {
     database.transaction(() => {
       database.run(`
@@ -121,13 +121,13 @@ function migrateNotesCascade(database: Database): void {
         CREATE INDEX idx_notes_public_slug ON notes(public_slug);
         CREATE INDEX idx_notes_is_public ON notes(is_public);
       `);
-      const violations = database.query("PRAGMA foreign_key_check(notes)").all();
+      const violations = database.query('PRAGMA foreign_key_check(notes)').all();
       if (violations.length > 0) {
         throw new Error(`notes has ${violations.length} orphaned row(s); migration aborted`);
       }
     })();
   } finally {
-    database.run("PRAGMA foreign_keys = ON;");
+    database.run('PRAGMA foreign_keys = ON;');
   }
 }
 
@@ -138,10 +138,10 @@ function createDb(): Database {
 
   // WAL lets readers run concurrently with the single writer. `foreign_keys` is
   // per-connection and off by default, so the cascades above are inert without it.
-  database.run("PRAGMA journal_mode = WAL;");
-  database.run("PRAGMA foreign_keys = ON;");
-  database.run("PRAGMA busy_timeout = 5000;");
-  database.run("PRAGMA synchronous = NORMAL;");
+  database.run('PRAGMA journal_mode = WAL;');
+  database.run('PRAGMA foreign_keys = ON;');
+  database.run('PRAGMA busy_timeout = 5000;');
+  database.run('PRAGMA synchronous = NORMAL;');
 
   database.run(SCHEMA);
   migrateNotesCascade(database);
@@ -166,10 +166,7 @@ export function query<T>(sql: string, params: SQLQueryBindings[] = []): T[] {
   return db.query<T, SQLQueryBindings[]>(sql).all(...params);
 }
 
-export function get<T>(
-  sql: string,
-  params: SQLQueryBindings[] = [],
-): T | undefined {
+export function get<T>(sql: string, params: SQLQueryBindings[] = []): T | undefined {
   return db.query<T, SQLQueryBindings[]>(sql).get(...params) ?? undefined;
 }
 

@@ -1,4 +1,4 @@
-import { get } from "@/lib/db";
+import { get } from '@/lib/db';
 
 export type RateLimitRule = { max: number; windowSeconds: number };
 
@@ -27,8 +27,8 @@ export function consumeRateLimit(key: string, { max, windowSeconds }: RateLimitR
  */
 export function clientIp(headers: Headers): string {
   return (
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headers.get("x-real-ip")?.trim() ||
-    "unknown"
+    headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    headers.get('x-real-ip')?.trim() ||
+    'unknown'
   );
 }

@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
-import { nextCookies } from "better-auth/next-js";
-import { headers } from "next/headers";
-import { db } from "@/lib/db";
+import { betterAuth } from 'better-auth';
+import { nextCookies } from 'better-auth/next-js';
+import { headers } from 'next/headers';
+import { db } from '@/lib/db';
 
 export const auth = betterAuth({
   // better-auth detects the Bun handle and drives it through its own

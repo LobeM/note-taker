@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import { APIError } from "better-auth/api";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { APIError } from 'better-auth/api';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
 import {
   type AuthField,
   type AuthMode,
@@ -11,9 +11,9 @@ import {
   safeRedirectPath,
   signInSchema,
   signUpSchema,
-} from "@/lib/auth-schemas";
-import { toFieldErrors } from "@/lib/form-errors";
-import { clientIp, consumeRateLimit, type RateLimitRule } from "@/lib/rate-limit";
+} from '@/lib/auth-schemas';
+import { toFieldErrors } from '@/lib/form-errors';
+import { clientIp, consumeRateLimit, type RateLimitRule } from '@/lib/rate-limit';
 
 export type AuthFormState = {
   fieldErrors?: Partial<Record<AuthField, string>>;
@@ -22,9 +22,9 @@ export type AuthFormState = {
   values?: { name?: string; email?: string };
 };
 
-type FormValues = AuthFormState["values"];
+type FormValues = AuthFormState['values'];
 
-const RATE_LIMITED = "Too many attempts. Wait a minute and try again.";
+const RATE_LIMITED = 'Too many attempts. Wait a minute and try again.';
 
 // Sign-in is limited per email as well as per IP: the IP comes from a header a
 // client can forge unless a proxy overwrites it, the email can't be dodged.
@@ -38,8 +38,7 @@ const SIGN_UP_PER_IP: RateLimitRule = { max: 5, windowSeconds: 600 };
  * success vs. failure still differs, which only email verification would close.
  */
 const MESSAGE_OVERRIDES: Record<string, string> = {
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
-    "Couldn't create an account with those details.",
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Couldn't create an account with those details.",
 };
 
 /** Runs a better-auth call and turns its APIError into form state. Returns null on success. */
@@ -57,7 +56,7 @@ async function toFormError(
         formError:
           (code && MESSAGE_OVERRIDES[code]) ??
           error.body?.message ??
-          "Something went wrong. Try again.",
+          'Something went wrong. Try again.',
         values,
       };
     }
@@ -75,9 +74,9 @@ export async function authenticate(
   _prevState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const name = String(formData.get("name") ?? "");
-  const email = String(formData.get("email") ?? "");
-  const password = String(formData.get("password") ?? "");
+  const name = String(formData.get('name') ?? '');
+  const email = String(formData.get('email') ?? '');
+  const password = String(formData.get('password') ?? '');
 
   // Forwarded so better-auth records the session's IP address and user agent.
   const requestHeaders = await headers();
@@ -85,7 +84,7 @@ export async function authenticate(
 
   let failure: AuthFormState | null;
 
-  if (parseMode(mode) === "signup") {
+  if (parseMode(mode) === 'signup') {
     const values = { name, email };
     const parsed = signUpSchema.safeParse({ name, email, password });
     if (!parsed.success) {
@@ -123,10 +122,10 @@ export async function authenticate(
 
   // Outside the try/catch above: redirect() signals by throwing, and catching
   // it would swallow the navigation.
-  redirect(safeRedirectPath(formData.get("next")));
+  redirect(safeRedirectPath(formData.get('next')));
 }
 
 export async function signOutAction(): Promise<void> {
   await auth.api.signOut({ headers: await headers() });
-  redirect("/auth");
+  redirect('/auth');
 }

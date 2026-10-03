@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation";
-import { cache } from "react";
-import { getCurrentUser } from "@/lib/auth";
-import { getNoteById } from "@/lib/notes";
+import { notFound, redirect } from 'next/navigation';
+import { cache } from 'react';
+import { getCurrentUser } from '@/lib/auth';
+import { getNoteById } from '@/lib/notes';
 
 /**
  * Loads the signed-in user's note, or bounces to /auth (returning to `path`)
