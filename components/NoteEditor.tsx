@@ -213,6 +213,10 @@ function Toolbar({ editor, disabled }: { editor: Editor; disabled: boolean }) {
               aria-label={button.label}
               aria-pressed={button.isActive ? active[button.label] : undefined}
               title={button.label}
+              // Keep focus (and the selection) in the editor. TipTap's focus()
+              // only restores it on the next frame, so keys typed in between
+              // would land on the button — and Space/Enter would re-press it.
+              onMouseDown={(event) => event.preventDefault()}
               onClick={() => button.run(editor)}
               className='min-w-8 rounded px-2 py-1 font-mono text-xs font-medium opacity-70 hover:bg-black/5 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:opacity-100 disabled:pointer-events-none dark:hover:bg-white/10'
             >
