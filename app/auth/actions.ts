@@ -1,9 +1,9 @@
 'use server';
 
-import { APIError } from 'better-auth/api';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { type AuthFormValues, toFormError } from '@/lib/auth-errors';
 import {
   type AuthField,
   type AuthMode,
@@ -19,10 +19,8 @@ export type AuthFormState = {
   fieldErrors?: Partial<Record<AuthField, string>>;
   formError?: string;
   /** Echoed back so a rejected submit doesn't wipe the form. Never the password. */
-  values?: { name?: string; email?: string };
+  values?: AuthFormValues;
 };
-
-type FormValues = AuthFormState['values'];
 
 const RATE_LIMITED = 'Too many attempts. Wait a minute and try again.';
 
@@ -31,38 +29,6 @@ const RATE_LIMITED = 'Too many attempts. Wait a minute and try again.';
 const SIGN_IN_PER_IP: RateLimitRule = { max: 20, windowSeconds: 60 };
 const SIGN_IN_PER_EMAIL: RateLimitRule = { max: 5, windowSeconds: 60 };
 const SIGN_UP_PER_IP: RateLimitRule = { max: 5, windowSeconds: 600 };
-
-/**
- * better-auth's sign-in errors are already enumeration-safe ("Invalid email or
- * password"). Sign-up's "User already exists" is not, so it is made vague here;
- * success vs. failure still differs, which only email verification would close.
- */
-const MESSAGE_OVERRIDES: Record<string, string> = {
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Couldn't create an account with those details.",
-};
-
-/** Runs a better-auth call and turns its APIError into form state. Returns null on success. */
-async function toFormError(
-  call: () => Promise<unknown>,
-  values: FormValues,
-): Promise<AuthFormState | null> {
-  try {
-    await call();
-    return null;
-  } catch (error) {
-    if (error instanceof APIError) {
-      const code = error.body?.code;
-      return {
-        formError:
-          (code && MESSAGE_OVERRIDES[code]) ??
-          error.body?.message ??
-          'Something went wrong. Try again.',
-        values,
-      };
-    }
-    throw error;
-  }
-}
 
 /**
  * `mode` is bound by the form, but bound arguments round-trip through the

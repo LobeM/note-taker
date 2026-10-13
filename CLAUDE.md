@@ -20,9 +20,37 @@ bun run build        # production build
 bun start            # serve the production build
 bun run lint         # eslint (flat config, auto-discovers eslint.config.mjs)
 bunx tsc --noEmit    # typecheck only
+bun run test         # Vitest, once (bun run test:watch to watch)
+bun run test lib/notes.test.ts   # one file; add -t "name" for one case
 ```
 
-No test runner is configured yet. If tests are added, use `bun test` (`@types/bun` is already a devDependency); a single file is `bun test path/to/file.test.ts`, a single case `bun test -t "name"`.
+**`bun run test`, never `bun test`** — the latter is Bun's own runner and ignores `vitest.config.mts`.
+
+## Testing
+
+- **Vitest runs on the Bun runtime** (`bun --bun vitest`) because `lib/db.ts` imports `bun:sqlite`. Bun makes the fork workers use Bun by putting a temporary `node` shim on PATH. Where that can't be written (e.g. a sandbox), the workers silently fall back to Node and fail with "Cannot find package 'bun:sqlite'". In that case, run `bun --bun node_modules/vitest/vitest.mjs run`.
+- **Two projects** in `vitest.config.mts`:
+  - `*.test.ts` runs in `node`.
+  - `*.test.tsx` runs in `happy-dom` with React Testing Library; `test/setup-dom.ts` does the cleanup.
+  - A `.ts` test that needs a DOM opts in with a `// @vitest-environment happy-dom` docblock (see `lib/editor-commands.test.ts`).
+- **Real SQLite, not mocks:**
+  - `DATABASE_PATH=':memory:'` is set in the config.
+  - Call `resetDb()` in `beforeEach`; the handle is cached on `globalThis`.
+  - Call `seedUser()` before creating notes, because of the foreign key. Both helpers are in `test/db.ts`; `makeUser()` builds a `getCurrentUser()` result.
+- **Mocks are opt-in per file** with a factory-less `vi.mock(...)`:
+  - `vi.mock('next/navigation')`: `redirect`/`notFound` throw. Assert with `rejects.toMatchObject({ url })`.
+  - `vi.mock('next/headers')`
+  - `vi.mock('@/lib/auth')`: better-auth never loads.
+  - Implementations live in `__mocks__/next/*` and `lib/__mocks__/auth.ts`.
+  - `vi.mock('@/lib/notes', { spy: true })` keeps the real repository but lets a test force a throw.
+  - `mockReset`/`restoreMocks` are on, so set mock return values per test.
+- Client component tests mock their server-action modules; `NoteForm` tests also swap `NoteEditor` for a textarea.
+- Async server components (pages, `Header`) aren't unit-testable in Vitest; logic they need belongs in `lib/` or a loader like `app/notes/[id]/load-note.ts`.
+- Testability seams worth keeping:
+  - `lib/note-form.ts`: FormData → validated note, shared by both note actions.
+  - `lib/auth-errors.ts`: a `'use server'` file can only export async actions, so helpers live outside it.
+  - `lib/editor-commands.ts`
+  - `createDb(path)` / `migrateNotesCascade(db)` exported from `lib/db.ts`.
 
 ## State of the repo
 

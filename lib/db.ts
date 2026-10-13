@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS rate_limit (
  * `CREATE TABLE IF NOT EXISTS` never alters. SQLite can't change a constraint in
  * place, so rebuild the table (sqlite.org/lang_altertable.html, "other changes").
  */
-function migrateNotesCascade(database: Database): void {
+export function migrateNotesCascade(database: Database): void {
   const fks = database
     .query<{ table: string; on_delete: string }, []>('PRAGMA foreign_key_list(notes)')
     .all();
@@ -131,10 +131,10 @@ function migrateNotesCascade(database: Database): void {
   }
 }
 
-function createDb(): Database {
-  mkdirSync(dirname(DB_PATH), { recursive: true });
+export function createDb(path: string = DB_PATH): Database {
+  mkdirSync(dirname(path), { recursive: true });
 
-  const database = new Database(DB_PATH, { create: true, strict: true });
+  const database = new Database(path, { create: true, strict: true });
 
   // WAL lets readers run concurrently with the single writer. `foreign_keys` is
   // per-connection and off by default, so the cascades above are inert without it.

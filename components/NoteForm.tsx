@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
 import { updateNoteAction } from '@/app/notes/[id]/actions';
-import { createNoteAction, type NoteFormState } from '@/app/notes/new/actions';
+import { createNoteAction } from '@/app/notes/new/actions';
 import { NoteEditor } from '@/components/NoteEditor';
+import type { NoteFormState } from '@/lib/note-form';
 import { DEFAULT_TITLE, EMPTY_DOC_JSON, TITLE_MAX_LENGTH } from '@/lib/note-schemas';
 
 const INITIAL_STATE: NoteFormState = {};

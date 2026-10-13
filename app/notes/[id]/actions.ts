@@ -1,10 +1,8 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import type { NoteFormState } from '@/app/notes/new/actions';
 import { getCurrentUser } from '@/lib/auth';
-import { toFieldErrors } from '@/lib/form-errors';
-import { noteSchema, type NoteField } from '@/lib/note-schemas';
+import { type NoteFormState, readNoteForm } from '@/lib/note-form';
 import { deleteNote, updateNote } from '@/lib/notes';
 
 // `noteId` is bound on the client, so it's untrusted: every query below is
@@ -18,35 +16,18 @@ export async function updateNoteAction(
   const user = await getCurrentUser();
   if (!user) redirect(`/auth?next=${encodeURIComponent(`/notes/${noteId}/edit`)}`);
 
-  const title = String(formData.get('title') ?? '');
-  // An unchecked checkbox isn't submitted at all.
-  const isPublic = formData.get('isPublic') === 'on';
-  const parsed = noteSchema.safeParse({
-    title,
-    content: String(formData.get('content') ?? ''),
-    isPublic,
-  });
-  if (!parsed.success) {
-    return {
-      fieldErrors: toFieldErrors<NoteField>(parsed.error),
-      values: { title, isPublic },
-    };
-  }
+  const form = readNoteForm(formData);
+  if (!form.success) return form.state;
 
   let updated: boolean;
   try {
-    updated =
-      updateNote(user.id, noteId, {
-        title: parsed.data.title,
-        contentJson: parsed.data.content,
-        isPublic: parsed.data.isPublic,
-      }) !== null;
+    updated = updateNote(user.id, noteId, form.data) !== null;
   } catch (error) {
     console.error('updateNote failed', error);
-    return { formError: "Couldn't save the note. Try again.", values: { title, isPublic } };
+    return { formError: "Couldn't save the note. Try again.", values: form.values };
   }
   if (!updated) {
-    return { formError: 'This note no longer exists.', values: { title, isPublic } };
+    return { formError: 'This note no longer exists.', values: form.values };
   }
 
   // Outside the try/catch: redirect() signals by throwing.
