@@ -12,10 +12,7 @@ type AuthFormProps = {
 
 const INITIAL_STATE: AuthFormState = {};
 
-const inputClassName =
-  'mt-1.5 w-full rounded-md border border-black/15 px-3 py-2 text-sm outline-none ' +
-  'focus-visible:border-black/40 aria-invalid:border-red-500 ' +
-  'dark:border-white/20 dark:focus-visible:border-white/50';
+const inputClassName = 'text-field mt-1.5 text-sm';
 
 export function AuthForm({ mode, next }: AuthFormProps) {
   const isSignUp = mode === 'signup';
@@ -28,7 +25,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
       {state.formError ? (
         <p
           role='alert'
-          className='rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300'
+          className='rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300'
         >
           {state.formError}
         </p>
@@ -97,7 +94,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         <button
           type='submit'
           aria-busy={pending}
-          className='rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2'
+          className='btn-primary mt-1'
         >
           {pending
             ? isSignUp

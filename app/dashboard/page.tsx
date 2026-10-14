@@ -19,10 +19,10 @@ export default async function DashboardPage() {
   return (
     <div className='mx-auto max-w-3xl px-6 py-12'>
       <div className='flex flex-wrap items-center justify-between gap-x-8 gap-y-4'>
-        <h1 className='text-3xl font-semibold tracking-tight'>Dashboard</h1>
+        <h1 className='text-4xl tracking-tight'>Dashboard</h1>
         <Link
           href='/notes/new'
-          className='rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2'
+          className='btn-primary'
         >
           New note
         </Link>
@@ -34,27 +34,27 @@ export default async function DashboardPage() {
           Your notes
         </h2>
         {notes.length === 0 ? (
-          <div className='rounded-md border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20'>
+          <div className='rounded-xl border border-dashed border-border-strong bg-surface/60 px-6 py-14 text-center'>
             <p className='font-medium'>No notes yet</p>
             <p className='mt-1 text-sm opacity-70'>
-              <Link href='/notes/new' className='underline underline-offset-4 hover:opacity-100'>
+              <Link href='/notes/new' className='font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary'>
                 Create your first note
               </Link>
               .
             </p>
           </div>
         ) : (
-          <ul className='divide-y divide-black/10 overflow-hidden rounded-md border border-black/10 dark:divide-white/15 dark:border-white/15'>
+          <ul className='card divide-y divide-border overflow-hidden'>
             {notes.map((note) => {
               const updated = parseSqliteDate(note.updatedAt);
               return (
                 <li key={note.id}>
                   <Link
                     href={`/notes/${note.id}`}
-                    className='flex items-center gap-4 px-4 py-3 hover:bg-black/3 focus-visible:outline-2 focus-visible:-outline-offset-2 dark:hover:bg-white/5'
+                    className='group flex items-center gap-4 border-l-2 border-transparent px-5 py-4 transition hover:border-primary hover:bg-accent/60 focus-visible:outline-2 focus-visible:-outline-offset-2 motion-reduce:transition-none'
                   >
                     <div className='min-w-0 flex-1'>
-                      <p className='truncate font-medium'>{note.title}</p>
+                      <p className='truncate font-medium transition group-hover:text-accent-foreground'>{note.title}</p>
                       <p className='mt-0.5 text-xs opacity-60'>
                         Updated <time dateTime={updated.toISOString()}>{formatDate(updated)}</time>
                       </p>

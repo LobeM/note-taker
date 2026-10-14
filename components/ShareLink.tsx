@@ -41,12 +41,12 @@ export function ShareLink({ slug }: ShareLinkProps) {
           readOnly
           value={url}
           onFocus={(event) => event.currentTarget.select()}
-          className='min-w-0 flex-1 rounded-md border border-black/15 px-3 py-1.5 font-mono text-sm outline-none focus-visible:border-black/40 dark:border-white/20 dark:focus-visible:border-white/50'
+          className='text-field min-w-0 flex-1 py-1.5 font-mono text-sm'
         />
         <button
           type='button'
           onClick={copy}
-          className='rounded-md border border-black/15 px-3 py-1.5 text-sm font-medium hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/20 dark:hover:bg-white/10'
+          className='btn-secondary'
         >
           Copy
         </button>
@@ -54,7 +54,7 @@ export function ShareLink({ slug }: ShareLinkProps) {
           href={path}
           target='_blank'
           rel='noopener'
-          className='rounded-md px-3 py-1.5 text-sm font-medium opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2'
+          className='rounded-lg px-3 py-1.5 text-sm font-medium text-primary hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2'
         >
           Open
         </a>

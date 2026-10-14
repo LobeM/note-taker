@@ -6,15 +6,19 @@ export async function Header() {
   const session = await getSession();
 
   return (
-    <header className='border-b border-black/10 dark:border-white/15'>
+    <header className='sticky top-0 z-10 border-b border-border bg-background/75 backdrop-blur-md'>
       <nav
         aria-label='Main'
-        className='mx-auto flex max-w-3xl items-center gap-4 px-6 py-6 text-sm'
+        className='mx-auto flex max-w-3xl items-center gap-4 px-6 py-4 text-sm'
       >
         <Link
           href='/dashboard'
-          className='rounded-sm text-base font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4'
+          className='flex items-center gap-2 rounded-sm font-display text-xl font-medium tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4'
         >
+          <span
+            aria-hidden
+            className='size-2.5 rotate-45 rounded-[3px] bg-linear-to-br from-primary to-fuchsia-400 shadow-sm shadow-primary/40'
+          />
           NextNotes
         </Link>
         {session ? (
@@ -23,14 +27,14 @@ export async function Header() {
             <form action={signOutAction}>
               <button
                 type='submit'
-                className='opacity-70 underline-offset-4 hover:underline hover:opacity-100'
+                className='btn-secondary'
               >
                 Sign out
               </button>
             </form>
           </div>
         ) : (
-          <Link href='/auth' className='ml-auto opacity-70 hover:opacity-100'>
+          <Link href='/auth' className='btn-primary ml-auto px-3 py-1.5'>
             Sign in
           </Link>
         )}

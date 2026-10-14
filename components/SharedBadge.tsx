@@ -1,6 +1,6 @@
 export function SharedBadge() {
   return (
-    <span className='rounded-full border border-black/15 px-2 py-0.5 text-xs font-medium opacity-80 dark:border-white/20'>
+    <span className='rounded-full border border-primary/20 bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground'>
       Shared
     </span>
   );

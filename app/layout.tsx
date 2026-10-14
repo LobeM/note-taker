@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Fraunces, Geist, Geist_Mono } from 'next/font/google';
 import { Header } from '@/components/Header';
 import './globals.css';
 
@@ -10,6 +10,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+const fraunces = Fraunces({
+  variable: '--font-fraunces',
   subsets: ['latin'],
 });
 
@@ -25,7 +30,7 @@ export const metadata: Metadata = {
 // now; if static rendering of /p/[slug] starts to matter, wrap it in <Suspense>.
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang='en' className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang='en' className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}>
       <body className='min-h-full flex flex-col'>
         <Header />
         <main className='flex-1'>{children}</main>

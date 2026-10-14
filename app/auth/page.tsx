@@ -29,8 +29,8 @@ export default async function AuthPage({ searchParams }: PageProps<'/auth'>) {
   const isSignUp = authMode === 'signup';
 
   return (
-    <div className='mx-auto max-w-sm px-6 py-16'>
-      <h1 className='text-3xl font-semibold'>{isSignUp ? 'Create your account' : 'Sign in'}</h1>
+    <div className='card mx-auto mt-16 max-w-sm p-8'>
+      <h1 className='text-3xl tracking-tight'>{isSignUp ? 'Create your account' : 'Sign in'}</h1>
       <p className='mt-2 text-sm opacity-70'>
         {isSignUp
           ? 'Email and password is all we need.'
@@ -45,7 +45,7 @@ export default async function AuthPage({ searchParams }: PageProps<'/auth'>) {
         {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
         <Link
           href={authHref(isSignUp ? 'signin' : 'signup', target)}
-          className='font-medium underline underline-offset-4 opacity-100'
+          className='font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary'
         >
           {isSignUp ? 'Sign in' : 'Create one'}
         </Link>

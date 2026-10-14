@@ -1,28 +1,93 @@
 @import 'tailwindcss';
 
+/* Theme tokens. Components use the semantic names (bg-primary, border-border,
+   bg-surface…), so the palette lives here and nowhere else. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf8fd;
+  --foreground: #1d1530;
+  --surface: #ffffff;
+  --border: rgb(76 29 149 / 0.12);
+  --border-strong: rgb(76 29 149 / 0.38);
+  --primary: #6d28d9;
+  --primary-hover: #5b21b6;
+  --primary-foreground: #ffffff;
+  --accent: #f3edfd;
+  --accent-foreground: #5b21b6;
+  --ring: #8b5cf6;
+  --glow: rgb(139 92 246 / 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0e0a16;
+    --foreground: #ece7f6;
+    --surface: #161021;
+    --border: rgb(196 181 253 / 0.13);
+    --border-strong: rgb(196 181 253 / 0.42);
+    --primary: #a78bfa;
+    --primary-hover: #c4b5fd;
+    --primary-foreground: #160d2b;
+    --accent: rgb(167 139 250 / 0.12);
+    --accent-foreground: #d8ccfe;
+    --ring: #a78bfa;
+    --glow: rgb(139 92 246 / 0.18);
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces), Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background:
+      radial-gradient(60rem 30rem at 50% -10rem, var(--glow), transparent 70%) no-repeat,
+      var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 25%, transparent);
+  }
+  :focus-visible {
+    outline-color: var(--ring);
+  }
+  input,
+  textarea,
+  [contenteditable] {
+    caret-color: var(--primary);
+  }
+  h1 {
+    @apply font-display font-medium;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn-primary {
+    @apply rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-md shadow-primary/25 ring-1 ring-white/15 ring-inset transition hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/30 focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none;
+  }
+  .btn-secondary {
+    @apply rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium shadow-xs transition hover:border-border-strong hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none;
+  }
+  .text-field {
+    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 shadow-xs outline-none transition placeholder:opacity-40 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 aria-invalid:border-red-500 motion-reduce:transition-none;
+  }
+  .card {
+    @apply rounded-xl border border-border bg-surface shadow-sm shadow-primary/5;
+  }
 }
 
 /* Rich-text content from TipTap (editor and, later, read-only views). */
@@ -31,10 +96,10 @@ body {
     @apply mt-3;
   }
   .tiptap h1 {
-    @apply text-3xl font-semibold tracking-tight;
+    @apply font-display text-3xl font-medium tracking-tight;
   }
   .tiptap h2 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply font-display text-2xl font-medium tracking-tight;
   }
   .tiptap h3 {
     @apply text-xl font-semibold;
@@ -52,21 +117,21 @@ body {
     @apply mt-1;
   }
   .tiptap blockquote {
-    @apply border-l-4 border-black/15 pl-4 italic opacity-80 dark:border-white/20;
+    @apply border-l-2 border-primary pl-4 font-display text-lg italic opacity-85;
   }
   .tiptap a {
-    @apply underline underline-offset-4 hover:opacity-80;
+    @apply text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary;
   }
   .tiptap code {
-    @apply rounded bg-black/5 px-1 py-0.5 font-mono text-[0.9em] dark:bg-white/10;
+    @apply rounded bg-accent px-1 py-0.5 font-mono text-[0.9em] text-accent-foreground;
   }
   .tiptap pre {
-    @apply overflow-x-auto rounded-md bg-black/5 p-4 font-mono text-sm dark:bg-white/10;
+    @apply overflow-x-auto rounded-lg border border-border bg-accent/60 p-4 font-mono text-sm;
   }
   .tiptap pre code {
     @apply bg-transparent p-0 text-inherit;
   }
   .tiptap hr {
-    @apply my-6 border-black/15 dark:border-white/20;
+    @apply my-6 border-border;
   }
 }

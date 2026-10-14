@@ -23,7 +23,7 @@ export default async function NotePage(props: PageProps<'/notes/[id]'>) {
       <div className='flex items-center justify-between gap-4'>
         <Link
           href='/dashboard'
-          className='rounded-sm text-sm opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2'
+          className='rounded-sm text-sm opacity-70 transition hover:text-primary hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2'
         >
           ← All notes
         </Link>
@@ -31,7 +31,7 @@ export default async function NotePage(props: PageProps<'/notes/[id]'>) {
         <div className='flex items-center gap-2'>
           <Link
             href={`/notes/${note.id}/edit`}
-            className='rounded-md border border-black/15 px-3 py-1.5 text-sm font-medium hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/20 dark:hover:bg-white/10'
+            className='btn-secondary'
           >
             Edit
           </Link>
@@ -39,8 +39,8 @@ export default async function NotePage(props: PageProps<'/notes/[id]'>) {
         </div>
       </div>
       <article className='mt-6'>
-        <header className='border-b border-black/10 pb-6 dark:border-white/15'>
-          <h1 className='text-3xl font-semibold tracking-tight wrap-break-word'>{note.title}</h1>
+        <header className='border-b border-border pb-6'>
+          <h1 className='text-4xl tracking-tight wrap-break-word'>{note.title}</h1>
           <div className='mt-2 flex items-center gap-3 text-sm opacity-70'>
             <p>
               Updated <time dateTime={updated.toISOString()}>{formatDate(updated)}</time>
