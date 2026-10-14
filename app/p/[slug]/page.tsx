@@ -26,8 +26,8 @@ export default async function PublicNotePage(props: PageProps<'/p/[slug]'>) {
 
   return (
     <article className='mx-auto max-w-3xl px-6 py-12'>
-      <header className='border-b border-black/10 pb-6 dark:border-white/15'>
-        <h1 className='text-3xl font-semibold tracking-tight wrap-break-word'>{note.title}</h1>
+      <header className='border-b border-border pb-6'>
+        <h1 className='text-4xl tracking-tight wrap-break-word'>{note.title}</h1>
         <p className='mt-2 text-sm opacity-70'>
           Updated <time dateTime={updated.toISOString()}>{formatDate(updated)}</time>
         </p>

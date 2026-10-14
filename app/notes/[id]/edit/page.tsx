@@ -14,7 +14,7 @@ export default async function EditNotePage(props: PageProps<'/notes/[id]/edit'>)
 
   return (
     <div className='mx-auto max-w-3xl px-6 py-12'>
-      <h1 className='text-3xl font-semibold tracking-tight'>Edit note</h1>
+      <h1 className='text-4xl tracking-tight'>Edit note</h1>
       <NoteForm
         note={{
           id: note.id,

@@ -56,7 +56,7 @@ export function NoteEditor({
   }, [editor, editable]);
 
   return (
-    <div className='mt-1.5 overflow-hidden rounded-md border border-black/15 focus-within:border-black/40 has-aria-invalid:border-red-500 dark:border-white/20 dark:focus-within:border-white/50'>
+    <div className='mt-1.5 overflow-hidden rounded-xl border border-border bg-surface shadow-xs transition focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/15 has-aria-invalid:border-red-500 motion-reduce:transition-none'>
       {editor ? <Toolbar editor={editor} disabled={!editable} /> : null}
       <EditorContent editor={editor} />
     </div>
@@ -156,12 +156,12 @@ function Toolbar({ editor, disabled }: { editor: Editor; disabled: boolean }) {
     <div
       role='toolbar'
       aria-label='Formatting'
-      className='flex flex-wrap items-center gap-1 border-b border-black/10 bg-black/2 px-2 py-1.5 dark:border-white/15 dark:bg-white/3'
+      className='flex flex-wrap items-center gap-1 border-b border-border bg-accent/50 px-2 py-1.5'
     >
       {BUTTON_GROUPS.map((group, groupIndex) => (
         <div key={groupIndex} className='flex items-center gap-1'>
           {groupIndex > 0 ? (
-            <span aria-hidden='true' className='mx-1 h-5 w-px bg-black/15 dark:bg-white/20' />
+            <span aria-hidden='true' className='mx-1 h-5 w-px bg-border-strong/40' />
           ) : null}
           {group.map((button) => (
             <button
@@ -176,7 +176,7 @@ function Toolbar({ editor, disabled }: { editor: Editor; disabled: boolean }) {
               // would land on the button — and Space/Enter would re-press it.
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => button.run(editor)}
-              className='min-w-8 rounded px-2 py-1 font-mono text-xs font-medium opacity-70 hover:bg-black/5 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:opacity-100 disabled:pointer-events-none dark:hover:bg-white/10'
+              className='min-w-8 rounded-md px-2 py-1 font-mono text-xs font-medium opacity-70 transition hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:opacity-100 aria-pressed:shadow-sm aria-pressed:shadow-primary/30 disabled:pointer-events-none motion-reduce:transition-none'
             >
               {button.text}
             </button>

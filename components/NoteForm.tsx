@@ -32,7 +32,7 @@ export function NoteForm({ note }: NoteFormProps) {
       {state.formError ? (
         <p
           role='alert'
-          className='rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300'
+          className='rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300'
         >
           {state.formError}
         </p>
@@ -54,7 +54,7 @@ export function NoteForm({ note }: NoteFormProps) {
             defaultValue={state.values?.title ?? note?.title}
             aria-invalid={titleError ? true : undefined}
             aria-describedby={titleError ? 'title-error' : undefined}
-            className='mt-1.5 w-full rounded-md border border-black/15 px-3 py-2 text-lg font-medium outline-none placeholder:opacity-40 focus-visible:border-black/40 aria-invalid:border-red-500 dark:border-white/20 dark:focus-visible:border-white/50'
+            className='text-field mt-1.5 text-lg font-medium'
           />
           {titleError ? (
             <p id='title-error' className='mt-1.5 text-sm text-red-700 dark:text-red-300'>
@@ -101,11 +101,11 @@ export function NoteForm({ note }: NoteFormProps) {
               role='switch'
               defaultChecked={state.values?.isPublic ?? note?.isPublic ?? false}
               aria-describedby='isPublic-hint'
-              className='peer h-6 w-11 cursor-pointer appearance-none rounded-full bg-black/15 transition-colors checked:bg-foreground focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed motion-reduce:transition-none dark:not-checked:bg-white/20'
+              className='peer h-6 w-11 cursor-pointer appearance-none rounded-full bg-border-strong/50 transition-colors checked:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed motion-reduce:transition-none'
             />
             <span
               aria-hidden
-              className='pointer-events-none absolute top-0.5 left-0.5 size-5 rounded-full bg-background shadow-sm transition-transform peer-checked:translate-x-5 motion-reduce:transition-none'
+              className='pointer-events-none absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5 motion-reduce:transition-none'
             />
           </span>
         </div>
@@ -113,14 +113,14 @@ export function NoteForm({ note }: NoteFormProps) {
         <div className='flex items-center justify-end gap-3'>
           <Link
             href={note ? `/notes/${note.id}` : '/dashboard'}
-            className='rounded-md px-4 py-2 text-sm font-medium opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2'
+            className='rounded-lg px-4 py-2 text-sm font-medium opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2'
           >
             Cancel
           </Link>
           <button
             type='submit'
             aria-busy={pending}
-            className='rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2'
+            className='btn-primary'
           >
             {note ? (pending ? 'Saving…' : 'Save changes') : pending ? 'Creating…' : 'Create note'}
           </button>

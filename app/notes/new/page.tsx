@@ -10,7 +10,7 @@ export default async function NewNotePage() {
 
   return (
     <div className='mx-auto max-w-3xl px-6 py-12'>
-      <h1 className='text-3xl font-semibold tracking-tight'>New note</h1>
+      <h1 className='text-4xl tracking-tight'>New note</h1>
       <NoteForm />
     </div>
   );
